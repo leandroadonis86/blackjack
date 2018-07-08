@@ -1,3 +1,4 @@
+This was a project for the class Development Distributed Applications. Someone wanted to reprove me in this class without any type of notion what I'm capable to do so...this was suposed to be group project for 2 students not one person project work for the group...I did this as an exam project in less than one week and half... not surprisely I got approved. A lesson for the dumb!
 
 My enviroment was Windows 10 64bit and for this project I've used:
 
@@ -20,9 +21,9 @@ To run:
   - Disable firewall.
   - in PHP extentions make sure "mbstring" and "sockets" are activated throw Laragon menu.
   - Open two Laragon terminal (with admin privileges) and execute:
-    on /var/www/html/blackjack:  forever start /public/js/vueapp.js
-      alternative use: npm run watch-poll
-    on var/www/html/blackjack/dediserver: node gameserver.js
+    on /var/www/html/blackjack:  "forever start /public/js/vueapp.js"
+      alternative use: "npm run watch-poll"
+    on var/www/html/blackjack/dediserver: "node gameserver.js"
     
 To enter:
   - Main link website: http://blackjack.dev/#/login
