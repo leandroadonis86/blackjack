@@ -11,14 +11,14 @@ To install:
   - Copy folder blackjack to x:/laragon/www (default laragon path).
   - Make database called "blackjack" in MySql throw Largon menu.
     migrations will struct your tables
-  - Use Laragon termina and execute: 
+  - Use Laragon terminal and execute: 
       "php artisan app:name blackjack" as said  https://laravel.com/docs/5.0/configuration#introduction
       "php artisan migrate" as said https://laravel.com/docs/5.6/migrations
       "php db:seed" as said https://laravel.com/docs/5.6/seeding
       
 To run:
   - Disable firewall.
-  - in PHP extentions make sure "mbstring" and "sockets" are activated throe Laragon menu.
+  - in PHP extentions make sure "mbstring" and "sockets" are activated throw Laragon menu.
   - Open two Laragon terminal (with admin privileges) and execute:
     on /var/www/html/blackjack:  forever start /public/js/vueapp.js
       alternative use: npm run watch-poll
