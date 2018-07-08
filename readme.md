@@ -25,7 +25,7 @@ To run:
     on var/www/html/blackjack/dediserver: node gameserver.js
     
 To enter:
-  - Main link website: http://blackjacklaravel.dev/#/login
+  - Main link website: http://blackjack.dev/#/login
   
 Author: Leandro Silva <@gmail.com>
 
