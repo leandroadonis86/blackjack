@@ -18,11 +18,17 @@ Vue.use(VueRouter);
 Vue.use(VueSocketio, 'http://127.0.0.1:8080');
 
 const user = Vue.component('user', require('./components/user.vue'));
+const login = Vue.component('login', require('./components/login.vue'));
+const account = Vue.component('account', require('./components/account.vue'));
+const statistics = Vue.component('statistics', require('./components/statistics.vue'));
 const multiplayerGame = Vue.component('multiplayergame', require('./components/multiplayer_blackjack.vue'));
 
 const routes = [
-  { path: '/', redirect: '/users' },
+  { path: '/', redirect: '/login' },
+  { path: '/login', component: login },
   { path: '/users', component: user },
+  { path: '/account', component: account },
+  { path: '/statistics', component: statistics },
   { path: '/multiblackjack', component: multiplayerGame }
 ];
 
@@ -33,8 +39,9 @@ const router = new VueRouter({
 const app = new Vue({
   router,
   data:{
-    player1: undefined,
-    player2: undefined,
+    isAdmin: false,
+    isAuthenticated: false,
+    own: { nickname: 'none' },
 	  playersList: []
   }
 }).$mount('#app');

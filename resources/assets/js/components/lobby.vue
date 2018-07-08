@@ -6,6 +6,7 @@
 	            <th>Creator</th>
 				<th>Time Created</th>
 				<th>Joined Players</th>
+				<th>Actions</th>
 	        </tr>
 	    </thead>
 	    <tbody>
@@ -15,7 +16,7 @@
 				<td>{{ game.gameDate }}</td>
 	            <td>{{ game.joinedPlayers }}</td>
 	            <td>
-	                <a class="btn btn-xs btn-primary" v-on:click.prevent="join(game)">Join</a>
+	                <a class="btn btn-xs btn-primary" v-on:click.prevent="join(game)" v-if="isAuthenticated">Join</a>
 	            </td>
 	        </tr>
 	    </tbody>
@@ -26,10 +27,22 @@
 	// Component code (not registered)
 	module.exports={
 		props: ['games'],
+        data: function(){
+			return {
+                isAuthenticated: this.autenticated()
+            }
+        },
         methods: {
             join(game) {
             	this.$emit('join-click', game);
-            },
+			},
+			autenticated() {
+				if(this.$root.isAuthenticated==null || this.$root.isAuthenticated==undefined) {
+					return false;
+				} else {
+					return this.$root.isAuthenticated;
+				}
+			},
         },
 	}
 </script>

@@ -26,9 +26,14 @@ class UpdateUserRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$this->user->id,
-            'password' => 'nullable|string|min:6|confirmed',
-            'age' => 'required|integer|min:18|max:75',
-            'department_id' => 'required|integer',
+            'password' => 'required|min:6|confirmed',
+            'nickname' => 'required|string|min:3',
+            'admin' => 'integer|max:1',
+            'blocked' => 'integer|max:1',
+            'reason_blocked' => 'nullable|string|max:255',
+            'reason_reactivated' => 'nullable|string|max:255',
+            'total_points' => 'integer|max:11',
+            'total_games_played' => 'integer|max:11',
         ];
     }
 }

@@ -26,9 +26,10 @@ class StoreUserRequest extends FormRequest
         return [
             'name' => 'required|regex:/^[a-zA-Z ]+$/',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:8|confirmed',
-            'age' => 'required|integer|min:18|max:75',
-            'department_id' => 'required|integer',
+            'password' => 'required|min:6|confirmed',
+            'nickname' => 'string|min:3|unique:users|regex:/^[a-zA-Z ]+$/',
+            'reason_blocked' => 'nullable|string|max:255',
+            'reason_reactivated' => 'nullable|string|max:255',
         ];
     }
 }

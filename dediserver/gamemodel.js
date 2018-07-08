@@ -22,9 +22,12 @@ class BlackjackGame {
         this.winner = 0;
         this.countdown = 20;
         this.stage = 2;
-        this.requests = 0;
         this.deck = [];
+        this.deckCopy = [];
         this.deckIndex = 0;
+        this.record = [];
+        this.recordIndex = 0;
+        this.finalscore = []; 
         this.initGame();
     }
 
@@ -34,14 +37,21 @@ class BlackjackGame {
             this.playersPoints.push(0);
             this.playersStatus.push('S');
         }
-        this.createDeck();
+        if(!this.gameReplay) {
+            this.createDeck();
+            this.deckCopy = this.deck.concat(); //cria copia para o replay
+        }
     }
 
     join(playerName){ //ok
         this.playersList.push(playerName);
         this.joinedPlayers++;
         this.gameStarted = this.checkStart();
-        if(this.gameStarted) {
+        this.start();
+    }
+
+    start() { //ok
+        if(this.gameStarted || this.gameReplay) {
             //começa a contar o tempo
             this.tik();
             this.redistribute();
@@ -155,6 +165,7 @@ class BlackjackGame {
                 this.playersStatus[i] = 'B';
             }
             this.winner = -1;
+            this.finalPoints();
             this.gameEnded = true;
             return true;
         }
@@ -192,13 +203,15 @@ class BlackjackGame {
                             this.playersStatus[i] = 'P';
                             this.playersStatus[j] = 'P';
                             this.winner = 0;
-                            this.gameEnded = true;
                             // os que não fizeram Push perdem
                             for(i=0;i<this.maxPlayers;i++) {
                                 if(this.playersStatus[i]!="P") {
                                     this.playersStatus[i] = 'L';
                                 }
                             }
+                            this.finalPoints();
+                            this.gameEnded = true;
+                            this.gameReplay = false;
                             return true;
                         }
                     }
@@ -212,7 +225,9 @@ class BlackjackGame {
                     this.playersStatus[i]="L";
                 }
             }
+            this.finalPoints();
             this.gameEnded = true;
+            this.gameReplay = false;
             return true;
         }
         return false
@@ -223,8 +238,10 @@ class BlackjackGame {
     }
 
     request(playerNumber) { //ok
-        if (!this.gameStarted || this.gameEnded) {
-            return false;
+        if(!this.gameReplay)  {
+            if (!this.gameStarted || this.gameEnded) {
+                return false;
+            }
         }
 
         // verifica se o jogador é valido par apedir carta extra
@@ -258,26 +275,35 @@ class BlackjackGame {
                 this.playersStatus[i]='';
             }
         }
-        console.log(this.playersStatus);
-        console.log(this.playersHand);
+        //console.log(this.playersStatus);
+        //console.log(this.playersHand);
     }
 
-    tik() {
+    tik() { //ok
         var intv;
         intv = setInterval(()=> {
-            if(this.gameStarted) {
+            if(this.gameStarted || this.gameReplay) {
                 if(this.stage>0) {
+                    if(this.gameReplay) {
+                        //gravar jogada no replay
+                        this.playersStatus=this.record[this.recordIndex++]; 
+                    } else {
+                        //reproduzir jogada no replay
+                        this.record.push(this.playersStatus.concat()); 
+                    }                    
                     if(!this.countdown) {
                         this.stage--;
                         this.botplay();
                         this.closeDeal();
+                        this.lastPlayer='';
                         this.redistribute();
                         this.checkGameEnded();
                     }
                     (this.countdown)? this.countdown-- : this.countdown=20;
                 } else {
                     this.gameEnded = true;
-                    clearInterval(this.intv);
+                    this.gameReplay = false; 
+                    clearInterval(intv);
                 }
             }
         },1000);
@@ -293,7 +319,7 @@ class BlackjackGame {
         for(i=0; i<this.maxPlayers;i++) {
             if(this.playersList[i].split("-")[0]=="Bot") {
                 if( this.ia(i) * 100 >= 100) {
-                    this.request(i+1); //+1 porque é player number
+                    this.request(i+1); //+1 porque é playernumber
                 }
             }
         }
@@ -375,6 +401,7 @@ class BlackjackGame {
             }
         }
 
+        // decisão da tentativa
         if(resto>=11) {
             return (ases+faces+valst)/tdeck;
         } else if(resto==10) {
@@ -386,6 +413,52 @@ class BlackjackGame {
         return 0;
     }
 
+    finalPoints() { //ok
+        // W-Winner, P-Push, B-Bust, R-Request, ''-Pending , L-Lose, S-Waiting
+        var i;
+        for(i=0;i<this.maxPlayers;i++) {
+            this.finalscore.push(0);
+            switch(this.playersStatus[i]) {
+                case "W":
+                //W-Winner
+                    this.finalscore[i] = 100;
+                    if(this.playersPoints[i]==21) {
+                        this.finalscore[i] += 50; 
+                    }
+                    break;
+                case "P":
+                //P-Push
+                    this.finalscore[i] = 50;
+                    break;
+                case "L":
+                //L-Lose
+                    this.finalscore[i] = 0;
+                    break;
+                case "B":
+                //B-Bust
+                    this.finalscore[i] = 0;
+                    break;
+            }
+        }  
+    }
+
+    reset() { //ok
+        this.playersPoints = [];
+        this.playersStatus = [];
+        this.deck = this.deckCopy;
+        this.playersHand = [[],[],[],[]];
+        this.countdown = 20;
+        this.deckIndex = 0;
+        this.stage = 2;
+        this.recordIndex = 0;
+    }
+
+    replay() { //ok
+        this.gameReplay = true;
+        this.reset();
+        this.initGame();
+        this.start();
+    }
 
 }
 

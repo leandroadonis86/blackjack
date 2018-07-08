@@ -25,6 +25,17 @@ io.on('connection', function (socket) {
 		// Notifications to the client
 		socket.emit('my_active_games_changed');
 		io.emit('lobby_changed');
+	});
+	
+    socket.on('replay_game', function (data){
+		let game = games.gameByID(data.gameID);
+		if (game === null) {
+			socket.emit('invalid_play', {'type': 'Invalid_Game', 'game': null});
+			return;
+		}
+		console.log("replaying game");
+		game.replay();
+		io.to(game.gameID).emit('game_changed', game);
     });
 
     socket.on('join_game', function (data){

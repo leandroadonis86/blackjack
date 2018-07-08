@@ -18,9 +18,12 @@ class User extends Resource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'age' => $this->age,
-            'department_id' => $this->department_id,
-            'department' => $this->department->name,
+            'password' => $this->password,
+            'nickname' => $this->nickname,
+            'admin' => $this->admin,
+            'blocked' => $this->blocked,
+            'total_points' => $this->total_points,
+            'total_games_played' => $this->total_games_played,
         ];
     }
 }

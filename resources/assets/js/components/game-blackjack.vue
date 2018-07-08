@@ -8,6 +8,7 @@
             <div class="alert" :class="alerttype">
                 <strong>{{ message }} &nbsp;&nbsp;&nbsp;&nbsp;
                     <a v-show="!game.gameStarted" v-on:click.prevent="addBot">Add Bot</a>
+                    <a v-show="game.gameEnded" v-on:click.prevent="replayGame" v-if="!game.gameReplay">Replay</a>
                     <a v-show="game.gameEnded" v-on:click.prevent="closeGame">Close Game</a></strong>
             </div>
             <h4>Time left: {{ game.countdown }}    
@@ -19,12 +20,12 @@
                         <td>{{ playerName }} <br> {{ status(p) }}</td>
                         <td>
                             <div v-for="(card, c) of game.playersHand[p]" >
-                                    <img class="card" v-bind:src="cardImageURL(card)" v-if="(p == (ownPlayerNumber-1)) && !game.gameEnded">
-                                    <img class="card" v-bind:src="cardImageURL(card)" v-if="(p != (ownPlayerNumber-1)) && (c==0) && !game.gameEnded">
-                                    <img class="card" v-bind:src="cardImageURL('semFace')" v-if="(p != (ownPlayerNumber-1)) && (c>0) && !game.gameEnded">
-                                    <img class="card" v-bind:src="cardImageURL(card)" v-if="game.gameEnded">
+                                    <img class="card" v-bind:src="cardImageURL(card)" v-if="(playerName == current) && !game.gameEnded">
+                                    <img class="card" v-bind:src="cardImageURL(card)" v-if="(playerName != current) && (c==0) && !game.gameEnded">
+                                    <img class="card" v-bind:src="cardImageURL('semFace')" v-if="(playerName !=  current) && (c>0) && !game.gameEnded">
+                                    <img class="card" v-bind:src="cardImageURL(card)" v-if="game.gameEnded">                                   
                             </div>
-                            <strong><a v-show="game.gameStarted" v-on:click="wantCard" v-if="!game.gameEnded && (p == (ownPlayerNumber-1)) && (game.playersStatus[p] == '')">Request</a></strong>
+                            <strong><a v-show="game.gameStarted" v-on:click="wantCard" v-if="!game.gameEnded && (playerName == current) && (game.playersStatus[p] == '')">Request</a></strong>
                         </td>
                 </tr>
                 </table>
@@ -39,18 +40,26 @@
         props: ['game'],
         data: function(){
 			return {
-
+                replaying: false,
+                scoreSubmited: false,
+                current: this.$parent.currentPlayer,
+                data: {
+                    id: this.$root.own.id, 
+                    nickname: this.$root.own.nickname, 
+                    total_points: this.$root.own.total_points, 
+                    total_games_played: this.$root.own.total_games_played
+                    }
             }
         },
         computed: {
             ownPlayerNumber(){
-                if (this.game.player1SocketID == this.$parent.socketId) {
+                if (this.current == this.game.playersList[0]) {
                     return 1;
-                } else if (this.game.player2SocketID == this.$parent.socketId) {
+                } else if (this.current == this.game.playersList[1]) {
                     return 2;
-                } else if (this.game.player3SocketID == this.$parent.socketId) {
+                } else if (this.current == this.game.playersList[2]) {
                     return 3;
-                } else if (this.game.player4SocketID == this.$parent.socketId) {
+                } else if (this.current == this.game.playersList[3]) {
                     return 4;
                 }
                 return 0;
@@ -87,7 +96,7 @@
                     return "Game has ended and " + this.game.playersList[this.game.winner-1] + " has won. You lost.";
                 } else {
                     if(this.game.lastPlayer != '') {
-                        return this.adversaryPlayerName +" had request another card";
+                        return this.game.lastPlayer +" had request another card";
                     } else {
                         return "Game has started";
                     }
@@ -123,6 +132,11 @@
             closeGame () {
                 this.$parent.close(this.game);
             },
+            replayGame () {
+                this.$parent.replay(this.game);
+                this.replaying=true;
+                this.refresh();
+            },
             wantCard() {
                 this.$parent.request(this.game);
             },
@@ -143,18 +157,38 @@
                     case '':
                      return "Pending...";
                     case 'S':
-                     return "Wainting..."
+                     return "Waiting..."
                     default:
                      return "Unknown";
                 }
                 return "Unknown";
             },
+            updateScore() {
+                if(!this.scoreSubmited) {
+                    //console.dir(this.game.finalscore);
+                    axios.put('api/user/score/'+this.data.id, {
+                            nickname: this.data.nickname,
+                            total_points: (this.data.total_points+this.game.finalscore[this.ownPlayerNumber-1]),
+                            total_games_played: (this.data.total_games_played+1)
+                        })
+                        .then(response=> {
+                            this.$root.own.total_points = (this.data.total_points+this.game.finalscore[this.ownPlayerNumber-1]);
+                            this.$root.own.total_games_played = (this.data.total_games_played+1);
+                        });
+                    this.scoreSubmited = true;
+                }
+            },
             refresh() {
-                if(!this.game.gameEnded) {
+                if(!this.game.gameEnded || this.replaying) {
+                    if(!this.game.gameReplay) {
+                            this.replaying=false;
+                    }
                     setTimeout(()=> {
                         this.$parent.update(this.game);
                         this.refresh();
                     }, 1000);
+                } else {
+                    this.updateScore();
                 }
             }
         },
@@ -174,6 +208,9 @@
 .card {
     width: 60px;
     height: 87px;
+}
+.board {
+    max-width: 450px;
 }
 .board div {
     border-style: none;

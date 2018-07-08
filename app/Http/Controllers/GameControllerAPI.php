@@ -32,6 +32,7 @@ class GameControllerAPI extends Controller
     {
         $request->validate([
             'player1' => 'required',
+            'maxPlayers' => 'required',
         ]);
         $game = new Game();
         $game->fill($request->all());
@@ -40,7 +41,6 @@ class GameControllerAPI extends Controller
         // and winner will be null
         $game->status = 'pending';
         $game->joinedPlayers = 1;
-        $game->maxPlayers = 2; //tem que ser dado pelo utilizador
         $game->winner = null;
         $game->save();
         return response()->json(new GameResource($game), 201);

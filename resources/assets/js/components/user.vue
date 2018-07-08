@@ -4,14 +4,13 @@
 			<h1>{{ title }}</h1>
 		</div>
 
-		<user-list :users="users" @edit-click="editUser" @delete-click="deleteUser" @message="childMessage" ref="usersListRef"></user-list>
+		<user-list :users="users" @edit-click="editUser" @blk-click="blockUser" @unblk-click="unblockUser" @delete-click="deleteUser" @message="childMessage" ref="usersListRef"></user-list>
 
 		<div class="alert alert-success" v-if="showSuccess">
-			 
 			<button type="button" class="close-btn" v-on:click="showSuccess=false">&times;</button>
 			<strong>{{ successMessage }}</strong>
 		</div>
-		<user-edit :user="currentUser" :departments="departments"  @user-saved="savedUser" @user-canceled="cancelEdit" v-if="currentUser"></user-edit>				
+		<user-edit :user="currentUser"  @user-saved="savedUser" @user-canceled="cancelEdit" v-if="currentUser"></user-edit>				
 	</div>				
 </template>
 
@@ -26,20 +25,40 @@
 		        showSuccess: false,
 		        successMessage: '',
 		        currentUser: null,
-		        users: [],
-		        departments: []
+		        users: []
 			}
 		},
 	    methods: {
 	        editUser: function(user){
 	            this.currentUser = user;
 	            this.showSuccess = false;
+			},
+	        blockUser: function(user){
+	            axios.put('api/users/block/'+user.id)
+	                .then(response => {
+	                    this.showSuccess = true;
+						this.successMessage = 'User with nickname '+user.nickname+' Blocked';
+						this.$refs.usersListRef.editingUser = null;
+						this.currentUser = null;
+	                    this.getUsers();
+					});
+			},
+	        unblockUser: function(user){
+	            axios.put('api/users/unblock/'+user.id)
+	                .then(response => {
+	                    this.showSuccess = true;
+						this.successMessage = 'User with nickname '+user.nickname+' Unblocked';
+						this.$refs.usersListRef.editingUser = null;
+						this.currentUser = null;
+	                    this.getUsers();
+					});
+					
 	        },
 	        deleteUser: function(user){
 	            axios.delete('api/users/'+user.id)
 	                .then(response => {
 	                    this.showSuccess = true;
-	                    this.successMessage = 'User Deleted';
+	                    this.successMessage = 'User with nickname '+user.nickname+' Deleted';
 	                    this.getUsers();
 	                });
 	        },
@@ -69,15 +88,6 @@
 	    },
 	    mounted() {
 			this.getUsers();
-			if (this.$root.departments.length === 0) {
-				axios.get('api/departments')
-  					.then(response=>{
-  						this.$root.departments = response.data.data; 
-  						this.departments = this.$root.departments;
-  					})
-  			} else {
-  				this.departments = this.$root.departments;
-  			}
 		}
 
 	}

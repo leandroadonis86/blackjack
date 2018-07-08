@@ -16,9 +16,13 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email', 
-        'age',
-        'department_id',
+        'email',
+        'password',
+        'nickname',
+        'admin',
+        'blocked',
+        'total_points',
+        'total_games_played',
     ];
 
     /**
@@ -29,9 +33,4 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
-
-    public function department()
-    {
-        return $this->belongsTo(Department::class);
-    }
 }
